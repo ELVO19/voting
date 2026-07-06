@@ -1,0 +1,90 @@
+{% extends 'voting/base.html' %}
+{% block title %}Cast Your Vote{% endblock %}
+
+{% block topnav %}
+<a href="{% url 'results' %}">View Results</a>
+<a href="{% url 'logout' %}">Logout</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ student.email }}</h2>
+    <p style="color:#4299e1; font-weight:600; font-size:14px;">
+    🗳️ {{ voters_count }} student{{ voters_count|pluralize }} ha{{ voters_count|pluralize:"s,ve" }} voted so far
+</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}message-error{% else %}message-success{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if has_voted %}
+        <div class="locked-notice">✅ You've already cast your vote. Thank you for participating!</div>
+    {% else %}
+        <p style="color:#666;">Select exactly <strong>2 candidates</strong> for Class Representative.</p>
+
+        <form method="post" id="vote-form">
+            {% csrf_token %}
+
+            {% for category in categories %}
+                <div class="column-title">{{ category.name }}</div>
+                <div class="candidate-list">
+                    {% for candidate in category.candidates.all %}
+                        <label class="candidate-card-v">
+                            {% if candidate.photo %}
+                                <img class="avatar-circle" src="{{ candidate.photo.url }}" alt="{{ candidate.name }}">
+                            {% else %}
+                                <div class="avatar-circle avatar-boy">{{ candidate.name|first|upper }}</div>
+                            {% endif %}
+                            <div class="candidate-info">
+                                <div class="candidate-name">{{ candidate.name }}</div>
+                                <div class="candidate-role">Class Representative Candidate</div>
+                            </div>
+                            <input type="checkbox" class="vote-checkbox" name="candidates" value="{{ candidate.id }}">
+                        </label>
+                    {% empty %}
+                        <p style="color:#999;">No candidates have been added for this category yet.</p>
+                    {% endfor %}
+                </div>
+            {% empty %}
+                <p style="color:#999;">No categories have been set up yet.</p>
+            {% endfor %}
+
+            <button type="submit" id="vote-btn">Vote</button>
+        </form>
+
+        <script>
+            const checkboxes = document.querySelectorAll('.vote-checkbox');
+            const maxAllowed = 2;
+
+            function updateHighlight(cb) {
+                const card = cb.closest('.candidate-card-v');
+                card.classList.toggle('checked-highlight', cb.checked);
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const checkedCount = document.querySelectorAll('.vote-checkbox:checked').length;
+                    if (checkedCount > maxAllowed) {
+                        cb.checked = false;
+                        alert('You can only vote for ' + maxAllowed + ' candidates.');
+                        return;
+                    }
+                    updateHighlight(cb);
+                });
+            });
+
+            document.getElementById('vote-form').addEventListener('submit', (e) => {
+                const checkedCount = document.querySelectorAll('.vote-checkbox:checked').length;
+                if (checkedCount !== maxAllowed) {
+                    e.preventDefault();
+                    alert('Please select exactly ' + maxAllowed + ' candidates before voting.');
+                }
+            });
+        </script>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'voting/base.html' %}
+{% block title %}Vote Confirmed{% endblock %}
+
+{% block topnav %}
+<a href="{% url 'results' %}">View Results</a>
+<a href="{% url 'logout' %}">Logout</a>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align:center;">
+    <div style="font-size:56px;">✅</div>
+    <h2>Thank you for voting!</h2>
+    <p style="color:#666;">Your vote has been recorded for <strong>{{ student.email }}</strong>. You can only vote once, so this is your final confirmation.</p>
+    <p style="color:#4299e1; font-weight:600; font-size:14px;">
+    🗳️ {{ voters_count }} student{{ voters_count|pluralize }} ha{{ voters_count|pluralize:"s,ve" }} voted so far
+</p>
+
+
+    <div style="text-align:left; max-width:400px; margin:24px auto 0;">
+        <div class="column-title">Your Selections</div>
+        <div class="candidate-list">
+            {% for vote in votes %}
+                <div class="candidate-card-v" style="cursor:default;">
+                    {% if vote.candidate.photo %}
+                        <img class="avatar-circle" src="{{ vote.candidate.photo.url }}" alt="{{ vote.candidate.name }}">
+                    {% else %}
+                        <div class="avatar-circle avatar-boy">{{ vote.candidate.name|first|upper }}</div>
+                    {% endif %}
+                    <div class="candidate-info">
+                        <div class="candidate-name">{{ vote.candidate.name }}</div>
+                        <div class="candidate-role">{{ vote.category.name }}</div>
+                    </div>
+                    <div style="margin-left:auto; color:#38a169; font-weight:700;">✓</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

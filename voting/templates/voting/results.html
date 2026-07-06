@@ -1,0 +1,29 @@
+{% extends 'voting/base.html' %}
+{% block title %}Results{% endblock %}
+
+{% block topnav %}
+<a href="{% url 'vote' %}">Back to Voting</a>
+{% endblock %}
+
+{% block content %}
+{% for result in results %}
+<div class="card">
+    <h2>{{ result.category.name }}</h2>
+    <p style="color:#666;">Total votes: {{ result.total_votes }}</p>
+
+    {% for c in result.candidates %}
+        <div class="result-row">
+            <div class="result-name">
+                <span>{{ c.name }}</span>
+                <span>{{ c.votes }} vote{{ c.votes|pluralize }}</span>
+            </div>
+            <div class="results-bar-bg">
+                <div class="results-bar-fill" style="width: {% widthratio c.votes result.total_votes 100 %}%;">
+                    {% if c.votes > 0 %}{% widthratio c.votes result.total_votes 100 %}%{% endif %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endfor %}
+{% endblock %}
